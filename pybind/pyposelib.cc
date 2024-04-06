@@ -725,6 +725,14 @@ std::pair<CameraPose, py::dict> estimate_1D_radial_absolute_pose_wrapper(const s
     return std::make_pair(pose, output_dict);
 }
 
+std::vector<bool> get_inliers_wrapper(const CameraPose &rel_pose, const std::vector<Eigen::Vector2d> &points2D_1,
+                                      const std::vector<Eigen::Vector2d> &points2D_2, const double &threshold) {
+
+    std::vector<char> inlier_mask;
+    get_inliers(rel_pose, points2D_1, points2D_2, threshold, &inlier_mask);
+    return convert_inlier_vector(inlier_mask);
+}
+
 } // namespace poselib
 
 PYBIND11_MODULE(poselib, m) {
@@ -823,6 +831,10 @@ PYBIND11_MODULE(poselib, m) {
     m.def("estimate_1D_radial_absolute_pose", &poselib::estimate_1D_radial_absolute_pose_wrapper, py::arg("points2D"),
           py::arg("points3D"), py::arg("ransac_opt") = py::dict(), py::arg("bundle_opt") = py::dict(),
           "Absolute pose estimation for the 1D radial camera model with non-linear refinement.");
+
+    // Inlier estimation
+    m.def("relpose_inliers", &poselib::get_inliers_wrapper, py::arg("rel_pose"), py::arg("points2D_1"),
+          py::arg("points2D_2"), py::arg("threshold"), "2D to 2D inliers from known pose");
 
     // Stand-alone non-linear refinement
     m.def("refine_absolute_pose", &poselib::refine_absolute_pose_wrapper, py::arg("points2D"), py::arg("points3D"),
