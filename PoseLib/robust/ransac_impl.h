@@ -92,14 +92,16 @@ RansacStats ransac(Solver &estimator, const RansacOptions &opt, Model *best_mode
             continue;
 
         // Refinement
-        Model refined_model = models[best_model_ind];
-        estimator.refine_model(&refined_model);
-        stats.refinements++;
-        double refined_msac_score = estimator.score_model(refined_model, &inlier_count);
-        if (refined_msac_score < stats.model_score) {
-            stats.model_score = refined_msac_score;
-            stats.num_inliers = inlier_count;
-            *best_model = refined_model;
+        if (opt.refine_model) {
+            Model refined_model = models[best_model_ind];
+            estimator.refine_model(&refined_model);
+            stats.refinements++;
+            double refined_msac_score = estimator.score_model(refined_model, &inlier_count);
+            if (refined_msac_score < stats.model_score) {
+                stats.model_score = refined_msac_score;
+                stats.num_inliers = inlier_count;
+                *best_model = refined_model;
+            }
         }
 
         // update number of iterations
@@ -117,13 +119,15 @@ RansacStats ransac(Solver &estimator, const RansacOptions &opt, Model *best_mode
     }
 
     // Final refinement
-    Model refined_model = *best_model;
-    estimator.refine_model(&refined_model);
-    stats.refinements++;
-    double refined_msac_score = estimator.score_model(refined_model, &inlier_count);
-    if (refined_msac_score < stats.model_score) {
-        *best_model = refined_model;
-        stats.num_inliers = inlier_count;
+    if (opt.refine_model) {
+        Model refined_model = *best_model;
+        estimator.refine_model(&refined_model);
+        stats.refinements++;
+        double refined_msac_score = estimator.score_model(refined_model, &inlier_count);
+        if (refined_msac_score < stats.model_score) {
+            *best_model = refined_model;
+            stats.num_inliers = inlier_count;
+        }
     }
 
     return stats;

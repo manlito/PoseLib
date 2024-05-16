@@ -50,6 +50,8 @@ struct RansacOptions {
     // Whether we should use real focal length checking: https://arxiv.org/abs/2311.16304
     // Assumes that principal points of both cameras are at origin.
     bool real_focal_check = false;
+    // Whether we should refine the model found
+    bool refine_model = true;
 };
 
 struct RansacStats {
